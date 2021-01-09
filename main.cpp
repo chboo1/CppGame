@@ -1,9 +1,36 @@
 #include <stdio.h>
 #include <conio.h>
 #include <cstdlib>
+#include <string>
+#include <iostream>
+using namespace std;
+
+#define KEY_W 119
 
 
-void render(int playerx, int playery, int enemyx, int enemyy, int attackX, int attackY, int mazeSize)
+class Main
+{
+	public:
+		int mazeSize;
+		int key;
+		int x;
+		int y;
+		int ex;
+		int ey;
+		int rx;
+		int ry;
+		int movementCountdown;
+		int attackCountdown;
+		int angle;
+		int attackX;
+		int attackY;
+		bool killedEnemy;
+		void render();
+		int nonblockInput();
+};
+
+
+void Main::render() //int playerx, int playery, int enemyx, int enemyy, int attackX, int attackY, int mazeSize
 {
 	int i;
 	int j;
@@ -17,15 +44,15 @@ void render(int playerx, int playery, int enemyx, int enemyy, int attackX, int a
 		printf("|");
 		for(j = 0; j < mazeSize; j = j + 1)
 		{
-			if ((i != playery || j != playerx) && (i != enemyy || j != enemyx) && (i != attackY || j != attackX))
+			if ((i != y || j != x) && (i != ey || j != ex) && (i != attackY || j != attackX))
 			{
 				printf(" ");
 			}
-			else if (i == playery && j == playerx)
+			else if (i == y && j == x)
 			{
 				printf("+");
 			}
-			else if (i == enemyy && j == enemyx)
+			else if (i == ey && j == ex)
 			{
 				printf("X");
 			}
@@ -42,157 +69,154 @@ void render(int playerx, int playery, int enemyx, int enemyy, int attackX, int a
 	}
 	printf("\n");
 }
-int nonblockInput()
+int Main::nonblockInput()
 {
-	int x = 0;
+	int t = 0;
 	if (kbhit())
 	{
-		x = getch();
+		t = getch();
 	}
 	else
 	{
-		x = -1;
+		t = -1;
 	}
-	return x;
+	return t;
 }
 
 int main()
 {
-	int mazeSize = 20;
+	Main mainClass;
+	mainClass.mazeSize = 20;
 	int key;
-	int x = 0;
-	int y = 0;
-	int ex = mazeSize - 1;
-	int ey = mazeSize - 1;
-	int rx;
-	int ry;
-	int movementCountdown = 0;
-	int attackCountdown = 0;
-	int angle = 0;
-	int attackX = -1;
-	int attackY = -1;
-	bool killedEnemy = false;
+	mainClass.x = 0;
+	mainClass.y = 0;
+	mainClass.ex = mainClass.mazeSize - 1;
+	mainClass.ey = mainClass.mazeSize - 1;
+	mainClass.movementCountdown = 0;
+	mainClass.attackCountdown = 0;
+	mainClass.angle = 0;
+	mainClass.attackX = -1;
+	mainClass.attackY = -1;
+	mainClass.killedEnemy = false;
 	clrscr();
-	render(x, y, ex, ey, attackX, attackY, mazeSize);
+	mainClass.render(); //x, y, ex, ey, attackX, attackY, mazeSize
+	bool enemyMoved = false;
+	int rx, ry;
 	do
 	{
-		key = nonblockInput();
-		//key = getch();
-		if (key == 119 || key == 87)
+		mainClass.key = mainClass.nonblockInput();
+		if (mainClass.key == KEY_W || mainClass.key == 87)
 		{
-			if (y != 0)
+			if (mainClass.y != 0)
 			{
-				y = y - 1;
-				angle = 3;
+				mainClass.y = mainClass.y - 1;
+				mainClass.angle = 3;
 			}
 		}
-		else if (key == 115 || key == 83)
+		else if (mainClass.key == 115 || mainClass.key == 83)
 		{
-			if (y != mazeSize - 1)
+			if (mainClass.y != mainClass.mazeSize - 1)
 			{
-				y = y + 1;
-				angle=1;
+				mainClass.y = mainClass.y + 1;
+				mainClass.angle = 1;
 			}
 		}
-		else if (key == 97 || key == 65)
+		else if (mainClass.key == 97 || mainClass.key == 65)
 		{
-			if (x != 0)
+			if (mainClass.x != 0)
 			{
-				x = x - 1;
-				angle = 2;
+				mainClass.x = mainClass.x - 1;
+				mainClass.angle = 2;
 			}
 		}
-		else if (key == 100 || key == 68)
+		else if (mainClass.key == 100 || mainClass.key == 68)
 		{
-			if (x != mazeSize - 1)
+			if (mainClass.x != mainClass.mazeSize - 1)
 			{
-				x = x + 1;
-				angle = 0;
+				mainClass.x = mainClass.x + 1;
+				mainClass.angle = 0;
 			}
 		}
-		else if (key == 111 || key == 79)
+		else if (mainClass.key == 111 || mainClass.key == 79)
 		{
-			if (angle == 0)
+			if (mainClass.angle == 0)
 			{
-				attackX = x + 1;
-				attackY = y;
+				mainClass.attackX = mainClass.x + 1;
+				mainClass.attackY = mainClass.y;
 			}
-			else if (angle == 1)
+			else if (mainClass.angle == 1)
 			{
-				attackX = x;
-				attackY = y + 1;
+				mainClass.attackX = mainClass.x;
+				mainClass.attackY = mainClass.y + 1;
 			}
-			else if (angle == 2)
+			else if (mainClass.angle == 2)
 			{
-				attackX = x - 1;
-				attackY = y;
+				mainClass.attackX = mainClass.x - 1;
+				mainClass.attackY = mainClass.y;
 			}
 			else
-			{	attackX = x;
-				attackY = y - 1;
+			{	mainClass.attackX = mainClass.x;
+				mainClass.attackY = mainClass.y - 1;
 			}
 		}
-		movementCountdown = movementCountdown + 1;
-		if (attackX != -1 || attackY != -1)
+		mainClass.movementCountdown = mainClass.movementCountdown + 1;
+		if (mainClass.attackX != -1 || mainClass.attackY != -1)
 		{
-		attackCountdown = attackCountdown + 1;
+			//mainClass.attackCountdown = mainClass.attackCountdown + 1;
+			mainClass.attackCountdown++;
 		}
-		if (attackCountdown >= 500)
+		if (mainClass.attackCountdown >= 500)
 		{
-			attackX = -1;
-			attackY = -1;
-			attackCountdown = 0;
+			mainClass.attackX = -1;
+			mainClass.attackY = -1;
+			mainClass.attackCountdown = 0;
 		}
-		if (movementCountdown == 10000)
+		if (mainClass.movementCountdown == 10000)
 		{
+			enemyMoved = false;
 			rx = (rand() % 3) - 1;
 			ry = (rand() % 3) - 1;
-			if (rx == -1 && ex != 0)
+			if (rx == -1 && mainClass.ex != 0)
 			{
-				ex = ex - 1;
+				mainClass.ex = mainClass.ex - 1;
+				enemyMoved = true;
 			}
-			if (rx == 1 && ex != mazeSize - 1)
+			if (rx == 1 && mainClass.ex != mainClass.mazeSize - 1)
 			{
-				ex = ex + 1;
+				mainClass.ex = mainClass.ex + 1;
+				enemyMoved = true;
 			}
-			if (ry == -1 && ey != 0)
+			if (ry == -1 && mainClass.ey != 0)
 			{
-				ey = ey - 1;
+				mainClass.ey = mainClass.ey - 1;
+				enemyMoved = true;
 			}
-			if (ry == 1 && ey != mazeSize - 1)
+			if (ry == 1 && mainClass.ey != mainClass.mazeSize - 1)
 			{
-				ey = ey + 1;
+				mainClass.ey = mainClass.ey + 1;
+				enemyMoved = true;
 			}
-			movementCountdown = 0;
+			mainClass.movementCountdown = 0;
 		}
-		if (key != -1 || rx == -1 || rx == 1 || ry == -1 || ry == 1)
+		if (mainClass.key != -1 || enemyMoved)
 		{
-		clrscr();
-		render(x, y, ex, ey, attackX, attackY, mazeSize);
-		if (key == -1)
-		{
-			rx = 0;
-			ry = 0;
+			clrscr();
+			mainClass.render();
 		}
-		}
-		//sleep(1);
-		if (attackX == ex && attackY == ey)
+		if (mainClass.attackX == mainClass.ex && mainClass.attackY == mainClass.ey)
 		{
 			clrscr();
 			printf("\n\n\n      You did it!");
 			printf(" ");
-			sleep(3);
 			clrscr();
-			killedEnemy = true;
-			key = 27;
+			mainClass.killedEnemy = true;
+			mainClass.key = 27;
 		}
-	} while(key != 27);
+	} while(mainClass.key != 27);
 	clrscr();
-	if (killedEnemy)
+	if (mainClass.killedEnemy)
 	{
-		printf("Bonne Fete Papa!\n");
-		printf("J'espere que ce petit jeu t'a plu.\n");
-		printf("Mais surtout, Bonne fete!\n");
+		printf("Congrats, you have killed the evil enemy!\n");
 	}
 	return 0;
 }
