@@ -5,7 +5,14 @@
 #include <iostream>
 using namespace std;
 
-#define KEY_W 119
+#define KEY_LOWER_W 119
+#define KEY_UPPER_W 87
+#define KEY_LOWER_S 115
+#define KEY_UPPER_S 83
+#define KEY_LOWER_A 97
+#define KEY_UPPER_A 65
+#define KEY_LOWER_D 100
+#define KEY_UPPER_D 68
 
 
 class Main
@@ -27,6 +34,7 @@ class Main
 		bool killedEnemy;
 		void render();
 		int nonblockInput();
+		void parseInputs();
 };
 
 
@@ -82,6 +90,63 @@ int Main::nonblockInput()
 	}
 	return t;
 }
+void Main::parseInputs()
+{
+	if (key == KEY_LOWER_W || key == KEY_UPPER_W)
+	{
+		if (y != 0)
+		{
+			y--;
+			angle = 3;
+		}
+	}
+	else if (key == 115 || key == 83)
+	{
+		if (y != mazeSize - 1)
+		{
+			y++;
+			angle = 1;
+		}
+	}
+	else if (key == 97 || key == 65)
+	{
+		if (x != 0)
+		{
+			x--;
+			angle = 2;
+		}
+	}
+	else if (key == 100 || key == 68)
+	{
+		if (x != mazeSize - 1)
+		{
+			x++;
+			angle = 0;
+		}
+	}
+	else if (key == 111 || key == 79)
+	{
+		if (mainClass.angle == 0)
+		{
+			mainClass.attackX = mainClass.x + 1;
+			mainClass.attackY = mainClass.y;
+		}
+		else if (mainClass.angle == 1)
+		{
+			mainClass.attackX = mainClass.x;
+			mainClass.attackY = mainClass.y + 1;
+		}
+		else if (mainClass.angle == 2)
+		{
+			mainClass.attackX = mainClass.x - 1;
+			mainClass.attackY = mainClass.y;
+		}
+		else
+		{	mainClass.attackX = mainClass.x;
+			mainClass.attackY = mainClass.y - 1;
+		}
+	}
+}
 
 int main()
 {
@@ -105,60 +170,6 @@ int main()
 	do
 	{
 		mainClass.key = mainClass.nonblockInput();
-		if (mainClass.key == KEY_W || mainClass.key == 87)
-		{
-			if (mainClass.y != 0)
-			{
-				mainClass.y = mainClass.y - 1;
-				mainClass.angle = 3;
-			}
-		}
-		else if (mainClass.key == 115 || mainClass.key == 83)
-		{
-			if (mainClass.y != mainClass.mazeSize - 1)
-			{
-				mainClass.y = mainClass.y + 1;
-				mainClass.angle = 1;
-			}
-		}
-		else if (mainClass.key == 97 || mainClass.key == 65)
-		{
-			if (mainClass.x != 0)
-			{
-				mainClass.x = mainClass.x - 1;
-				mainClass.angle = 2;
-			}
-		}
-		else if (mainClass.key == 100 || mainClass.key == 68)
-		{
-			if (mainClass.x != mainClass.mazeSize - 1)
-			{
-				mainClass.x = mainClass.x + 1;
-				mainClass.angle = 0;
-			}
-		}
-		else if (mainClass.key == 111 || mainClass.key == 79)
-		{
-			if (mainClass.angle == 0)
-			{
-				mainClass.attackX = mainClass.x + 1;
-				mainClass.attackY = mainClass.y;
-			}
-			else if (mainClass.angle == 1)
-			{
-				mainClass.attackX = mainClass.x;
-				mainClass.attackY = mainClass.y + 1;
-			}
-			else if (mainClass.angle == 2)
-			{
-				mainClass.attackX = mainClass.x - 1;
-				mainClass.attackY = mainClass.y;
-			}
-			else
-			{	mainClass.attackX = mainClass.x;
-				mainClass.attackY = mainClass.y - 1;
-			}
-		}
 		mainClass.movementCountdown = mainClass.movementCountdown + 1;
 		if (mainClass.attackX != -1 || mainClass.attackY != -1)
 		{
