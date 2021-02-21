@@ -16,6 +16,10 @@ using namespace std;
 #define KEY_LOWER_O 111
 #define KEY_UPPER_O 79
 
+#define ANGLE_UP 3
+#define ANGLE_RIGHT 0
+#define ANGLE_DOWN 1
+#define ANGLE_LEFT 2
 
 class Main
 {
@@ -36,13 +40,17 @@ class Main
 		int angle;
 		int attackX;
 		int attackY;
+		int pMaxHealth = 3;
+		int pHealth = pMaxHealth;
+		int eMaxHealth = 3;
+		int eHealth = eMaxHealth;
 		bool killedEnemy;
 		bool AIMoved = false;
 		bool PlayerMoved = false;
 		void render();
 		int nonblockInput();
 		void parseInputs();
-		void moveAI();
+		void moveAI(int forceAngle, int speed);
 		Main()
 		{
 			printf("Hello there");
@@ -51,7 +59,7 @@ class Main
 			y = 0;
 			ex = mazeSize - 1;
 			ey = mazeSize - 1;
-			movementCountdown = 100000;
+			movementCountdown = 10000;
 			attackCountdown = 0;
 			angle = 0;
 			attackX = -1;
@@ -68,8 +76,8 @@ class Main
 				movementCountdown--;
 				if (movementCountdown == 0)
 				{
-					moveAI();
-					movementCountdown = 100000;
+					moveAI(5, 1);
+					movementCountdown = 10000;
 				}
 				if (AIMoved == true || PlayerMoved == true)
 				{
@@ -78,8 +86,15 @@ class Main
 				}
 				if (attackX == ex && attackY == ey)
 				{
-					key = 27;
-					killedEnemy = true;
+					eHealth--;
+					moveAI(angle, 2);
+					attackCountdown = 0;
+					printf("%d", eHealth);
+					if (eHealth < 1)
+					{
+						key = 27;
+						killedEnemy = true;
+					}
 				}
 				if (attackCountdown != 0)
 				{
@@ -96,7 +111,7 @@ class Main
 			}while (key != 27);
 			if (killedEnemy)
 			{
-				printf("Good job, you killed the evil enemy!");
+				printf("Good job, you killed the evil enemy!\n");
 			}
 
 		}
@@ -107,6 +122,8 @@ void Main::render() //int playerx, int playery, int enemyx, int enemyy, int atta
 {
 	int i;
 	int j;
+	printf("Player lives: %d\n", pHealth);
+	printf("Enemy lives: %d\n", eHealth);
 	std::cout << std::string(mazeSize + 2, '-') << '\n';
 	for(i = 0; i < mazeSize; i = i + 1)
 	{
@@ -154,7 +171,7 @@ void Main::parseInputs()
 		if (y != 0)
 		{
 			y--;
-			angle = 3;
+			angle = ANGLE_UP;
 			PlayerMoved = true;
 		}
 	}
@@ -163,16 +180,16 @@ void Main::parseInputs()
 		if (y != mazeSize - 1)
 		{
 			y++;
-			angle = 1;
+			angle = ANGLE_DOWN;
 			PlayerMoved = true;
 		}
 	}
 	else if (key == KEY_LOWER_A || key == KEY_UPPER_A)
 	{
 		if (x != 0)
-		{
+		{ 
 			x--;
-			angle = 2;
+			angle = ANGLE_LEFT;
 			PlayerMoved = true;
 		}
 	}
@@ -181,7 +198,7 @@ void Main::parseInputs()
 		if (x != mazeSize - 1)
 		{
 			x++;
-			angle = 0;
+			angle = ANGLE_RIGHT;
 			PlayerMoved = true;
 		}
 	}
@@ -190,22 +207,22 @@ void Main::parseInputs()
 		PlayerMoved = true;
 		attacking = true;
 		attackCountdown = 1000;
-		if (angle == 0)
+		if (angle == ANGLE_RIGHT)
 		{
 			attackX = x + 1;
 			attackY = y;
 		}
-		else if (angle == 1)
+		else if (angle == ANGLE_DOWN)
 		{
 			attackX = x;
 			attackY = y + 1;
 		}
-		else if (angle == 2)
+		else if (angle == ANGLE_LEFT)
 		{
 			attackX = x - 1;
 			attackY = y;
 		}
-		else
+		else /* ANGLE_UP */
 		{	attackX = x;
 			attackY = y - 1;
 		}
@@ -217,25 +234,65 @@ void Main::parseInputs()
 }
 
 
-void Main::moveAI()
+void Main::moveAI(int forceAngle, int speed)
 {
-	rx = rand() % 3;
-	ry = rand() % 3;
-	rx--;
-	ry--;
-	if (rx + ex > 0 && rx + ex < mazeSize - 1)
+	AIMoved = false;
+	if (forceAngle == 5)
 	{
-		ex = ex + rx;
-		AIMoved = true;
+		switch (rand() % 4) {
+			case ANGLE_UP:
+				if (ey > 0) {
+					ey = ey - speed;
+					AIMoved = true;
+				}
+				break;
+			case ANGLE_DOWN:
+				if (ey < mazeSize - 1) {
+					ey = ey + speed;
+					AIMoved = true;
+				}
+				break;
+			case ANGLE_LEFT:
+				if (ex > 0) {
+					ex = ex - speed;
+					AIMoved = true;
+				}
+				break;
+			case ANGLE_RIGHT:
+				if (ex < mazeSize - 1) {
+					ex = ex + speed;
+					AIMoved = true;
+				}
+				break;
+		}
 	}
-	else if (ry + ey > 0 && ry + ey < mazeSize - 1)
-	{
-		ey = ey + ry;
-		AIMoved = true;
-	}
-	else
-	{
-		AIMoved = false;
+	else {
+		switch (forceAngle) {
+			case ANGLE_UP:
+				if (ey > 0) {
+					ey = ey - speed;
+					AIMoved = true;
+				}
+				break;
+			case ANGLE_DOWN:
+				if (ey < mazeSize - 1) {
+					ey = ey + speed;
+					AIMoved = true;
+				}
+				break;
+			case ANGLE_LEFT:
+				if (ex > 0) {
+					ex = ex - speed;
+					AIMoved = true;
+				}
+				break;
+			case ANGLE_RIGHT:
+				if (ex < mazeSize - 1) {
+					ex = ex + speed;
+					AIMoved = true;
+				}
+				break;
+		}
 	}
 }
 
